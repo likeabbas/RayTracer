@@ -14,11 +14,11 @@ impl Ray {
         Ray { origin, direction }
     }
 
-    pub fn origin(&mut self) -> &mut Point3<f64> {
-        &mut self.origin
+    pub fn origin(&self) -> &Point3<f64> {
+        &self.origin
     }
-    pub fn direction(&mut self) -> &mut Vector3<f64> {
-        &mut self.direction
+    pub fn direction(&self) -> &Vector3<f64> {
+        &self.direction
     }
 
     pub fn at(&self, t: f64) -> Point3<f64> {
@@ -26,14 +26,53 @@ impl Ray {
     }
 }
 
+fn unit_vector(direction: &Vector3<f64>) -> Vector3<f64> {
+    direction / (direction.len() as f64)
+}
 
+
+
+/*
+bool hit_sphere(const point3& center, double radius, const ray& r) {
+    vec3 oc = r.origin() - center;
+    auto a = dot(r.direction(), r.direction());
+    auto b = 2.0 * dot(oc, r.direction());
+    auto c = dot(oc, oc) - radius*radius;
+    auto discriminant = b*b - 4*a*c;
+    return (discriminant > 0);
+}
+
+color ray_color(const ray& r) {
+    if (hit_sphere(point3(0,0,-1), 0.5, r))
+        return color(1, 0, 0);
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5*(unit_direction.y() + 1.0);
+    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+}
+ */
 
 fn ray_color(r: &Ray) -> Vector3<f64> {
-    let unit_direction: Vector3<f64> = r.direction / (r.direction.len() as f64);
+    let p0: &Point3<f64> = &Point3::new(0.0, 0.0, -1.0);
+    if hit_sphere(p0, 0.5, r) {
+        return Vector3::new(1.0, 0.0, 0.0);
+    }
+
+    let unit_direction: Vector3<f64> = unit_vector(r.direction());
     let t: f64 = 0.5*(unit_direction.y + 1.0);
     // let u = 1.0 - t;
     ((1.0 - t)*Vector3::new(1.0, 1.0, 1.0)) + (t*Vector3::new(0.5, 0.7, 1.0))
 }
+
+fn hit_sphere(center: &Point3<f64>, radius: f64, r: &Ray) -> bool {
+    let oc: Vector3<f64> = r.origin() - center;
+    let a = r.direction().dot(r.direction());
+    let b = 2.0 * oc.dot(r.direction());
+    let c = oc.dot(&oc) - radius*radius;
+    let discriminant: f64 = b*b - 4.0*a*c;
+
+    discriminant > 0.0
+}
+
 
 fn main() {
     // Image
